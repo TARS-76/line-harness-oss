@@ -21,23 +21,35 @@
 ### 2.1 Private → OSS（手動運用）
 
 ```
-Private push → bash scripts/sync-oss.sh を手動実行 → OSS に反映
+Private の同期対象ブランチ → bash scripts/sync-oss.sh を手動実行 → OSS に反映
 ```
 
 - `.github/workflows/sync-oss.yml` は意図的に失敗運用 (即時公開でうっかり OSS に出る事故防止)
 - OSS に反映したいタイミングで `bash scripts/sync-oss.sh` を手動実行
-- `rsync --delete` で同期（除外ファイルあり）
-- シークレット自動置換（sed）
+- `rsync` は **no-delete** で実行（OSS-only community files を消さない）
+- 除外ルールは `scripts/oss-sync.excludes`
+- シークレット自動置換は `scripts/oss-secret-redactions.sed`
+- リーク検知は `scripts/oss-secret-grep.patterns`
 - リーク検知で失敗時は同期中止
+
+同期前に必ず確認すること:
+
+```bash
+cd /path/to/line-harness
+git status --short
+git branch --show-current
+```
+
+作業ブランチから同期する場合は、そのブランチが「今回 OSS に出してよい内容だけ」を含むこと。`origin/main` が古い場合でも、最新の安全な同期元が作業ブランチであれば、そのブランチを同期対象にしてよい。
 
 ### 2.2 OSS → Private（手動・必須）
 
 ```
-OSS PR マージ → Private に cherry-pick → Private push → sync で OSS に反映
+OSS PR マージ → Private に取り込み → Private の同期対象ブランチから sync で OSS に反映
 ```
 
 **OSS で PR がマージされたら、次の Private → OSS sync の前に必ず Private に取り込むこと。**
-取り込まないと sync の `rsync --delete` で OSS 側の変更が消える。
+取り込まないまま private 側で同名ファイルを持つと、次の sync で OSS 側の変更が上書きされる。
 
 #### 手順
 
@@ -54,23 +66,24 @@ git apply /tmp/pr<番号>.patch --3way
 git add -A
 git commit -m "feat: <説明> (from OSS PR #<番号>)"
 
-# 4. push（sync-oss.yml が自動で OSS に反映）
+# 4. push または同期対象ブランチ上で manual sync
 git push
 ```
 
 ### 2.3 フローチャート
 
 ```
-[Private 開発] ──push──→ [GitHub Actions sync] ──→ [OSS 反映]
+[Private 開発] ──manual sync──→ [OSS 反映]
                                                         ↑
-[OSS PR マージ] ──cherry-pick──→ [Private に取込] ──push──┘
+[OSS PR マージ] ──cherry-pick/apply──→ [Private に取込] ──sync──┘
 ```
 
 ---
 
 ## 3. 除外ファイル（OSS に含めないもの）
 
-sync-oss.yml と sync-oss.sh の両方で一致させること。
+除外ルールは `scripts/oss-sync.excludes` を正とする。同期スクリプト内に
+同じ除外リストを重複定義しないこと。
 
 | ファイル/ディレクトリ | 理由 |
 |---------------------|------|
@@ -82,14 +95,18 @@ sync-oss.yml と sync-oss.sh の両方で一致させること。
 | `.env.example` | Private 版は除外（OSS 独自版あり） |
 | `docs/superpowers/` | 内部プラン・設計書 |
 | `README.md` | OSS 独自版あり |
+| `CONTRIBUTING.md` / `SECURITY.md` / `SUPPORT.md` | OSS 独自の community / security policy |
 | `CHANGELOG.md` | OSS 独自版あり |
 | `PROGRESS.md` | 内部進捗 |
 | `SPEC.md` | 内部仕様 |
 | `COMPETITOR_FEATURES.md` | 競合分析 |
+| `.github/ISSUE_TEMPLATE` / `.github/PULL_REQUEST_TEMPLATE.md` / `.github/labeler.yml` | OSS 独自の intake 設定 |
 | `.github/workflows/` | Private 用 CI/CD |
-| `node_modules/` / `dist/` / `.next/` / `apps/web/out/` | ビルド成果物 |
+| `node_modules/` / `.pnpm-store/` / `dist/` / `.next/` / `apps/web/out/` / `apps/liff/dist/` / `*.tsbuildinfo` | ビルド成果物 |
+| `scripts/sync-oss.sh` / `scripts/oss-*` | private→OSS 同期の内部運用 |
+| `scripts/deploy-production.sh` / `scripts/fix-liff-endpoint-url.mjs` | private 本番運用 |
 
-**新しい除外ファイルを追加する場合、sync-oss.yml と sync-oss.sh の両方を更新すること。**
+**新しい除外ファイルを追加する場合、`scripts/oss-sync.excludes` を更新すること。**
 
 ---
 
@@ -97,7 +114,7 @@ sync-oss.yml と sync-oss.sh の両方で一致させること。
 
 ### 4.1 自動置換パターン
 
-sync 時に以下のパターンを自動で置換する。新しいシークレットが追加された場合、両方のスクリプトに追加すること。
+sync 時に `scripts/oss-secret-redactions.sed` のパターンを自動で置換する。新しいシークレットが追加された場合、同ファイルと `scripts/oss-secret-grep.patterns` の両方を更新すること。
 
 | パターン | 置換後 |
 |---------|--------|
@@ -109,7 +126,7 @@ sync 時に以下のパターンを自動で置換する。新しいシークレ
 
 ### 4.2 リーク検知
 
-sync 完了前に grep でリークチェック。検出されたら sync 中止。
+sync 完了前に `scripts/oss-secret-grep.patterns` でリークチェック。検出されたら sync 中止。
 
 ### 4.3 絶対禁止事項
 
@@ -258,8 +275,10 @@ MCP や Claude Code で操作する際の追加ルール。
 ### Private → OSS sync 前
 
 - [ ] 新しいファイルにシークレットが含まれていないか
-- [ ] sync-oss.yml と sync-oss.sh の除外リストが一致しているか
+- [ ] `scripts/oss-sync.excludes` に除外漏れがないか
 - [ ] 置換パターンに漏れがないか
+- [ ] OSS で先行した community / governance 変更が private に取り込まれているか
+- [ ] `bash scripts/sync-oss.sh` の実行対象ブランチが、今回公開してよい内容だけを含むか
 
 ### OSS PR マージ後
 

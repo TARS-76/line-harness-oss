@@ -11,8 +11,8 @@ import type {
 
 const ACCOUNT_ID = 'acct123';
 const API_TOKEN = 'tok_abc';
-const WORKER_NAME = 'line-crm-worker';
-const ADMIN_PROJECT = 'line-crm-admin';
+const WORKER_NAME = 'your-worker-name';
+const ADMIN_PROJECT = 'your-admin-name';
 const LIFF_PROJECT = 'line-crm-liff';
 const D1_ID = 'db_xyz';
 

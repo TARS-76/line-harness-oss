@@ -11,7 +11,7 @@ interface Props {
 }
 
 // Worker base URL for webhook / OAuth / LIFF endpoint registration.
-// In production this is something like https://line-crm-worker.line-crm-api.workers.dev.
+// In production this is something like https://your-worker.your-subdomain.workers.dev.
 // We derive it from NEXT_PUBLIC_API_URL because the admin UI already requires
 // that env var (build fails without it — see apps/web/src/lib/api.ts).
 function workerBase(): string {

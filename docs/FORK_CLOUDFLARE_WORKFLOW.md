@@ -62,8 +62,8 @@ Variables:
 | 名前 | 用途 |
 | --- | --- |
 | `LINE_HARNESS_CLOUDFLARE_DEPLOY` | `true` にすると fork の deploy workflow が有効 |
-| `WORKER_NAME` | Worker 名。未設定なら `line-crm-worker` |
-| `PAGES_PROJECT_NAME` | Pages project 名。未設定なら `line-crm-admin` |
+| `WORKER_NAME` | Worker 名。未設定なら `your-worker-name` |
+| `PAGES_PROJECT_NAME` | Pages project 名。未設定なら `your-admin-name` |
 | `VITE_LIFF_ID` | LIFF ID |
 | `VITE_BOT_BASIC_ID` | LINE bot basic ID |
 | `VITE_CALENDAR_CONNECTION_ID` | Google Calendar 連携を使う場合だけ設定 |

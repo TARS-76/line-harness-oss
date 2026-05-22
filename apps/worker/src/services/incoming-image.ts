@@ -12,7 +12,7 @@ export interface FetchAndStoreOptions {
   r2: R2Bucket;
   /** workers 環境では globalThis.fetch を使う。テスト時に注入する。 */
   fetch?: typeof fetch;
-  /** 公開 URL のベース (例: https://line-crm-worker.line-crm-api.workers.dev) */
+  /** 公開 URL のベース (例: https://your-worker.your-subdomain.workers.dev) */
   workerUrl: string;
   channelAccessToken: string;
   accountId: string;

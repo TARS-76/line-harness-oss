@@ -49,8 +49,8 @@ LINE Harness は、LINE公式アカウント向けのオープンソース CRM /
 
 | コンポーネント | URL |
 |---------------|-----|
-| API | `https://line-crm-worker.line-crm-api.workers.dev` |
-| 管理画面 | `https://line-crm-admin.pages.dev` |
+| API | `https://your-worker.your-subdomain.workers.dev` |
+| 管理画面 | `https://your-admin.pages.dev` |
 | D1 | `line-crm` (APAC/KIX) |
 
 ## L社 / U社 との比較

@@ -9,7 +9,7 @@ import { executeD1Query } from '../cf-api/d1.js';
  * deployed Pages/Worker — verify just needs ready-to-hit URLs.
  */
 export interface VerifyUrls {
-  /** Worker `/health` endpoint (e.g. `https://line-crm-worker.example.workers.dev/health`). */
+  /** Worker `/health` endpoint (e.g. `https://your-worker-name.example.workers.dev/health`). */
   workerHealthUrl: string;
   /** Admin Pages root URL (e.g. `https://admin.example.pages.dev/`). */
   adminUrl: string;

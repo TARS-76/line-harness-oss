@@ -13,7 +13,7 @@ workers_dev = true
 # デフォルト = テスト環境 (noda@)
 # 使い方: npx wrangler deploy
 # ═══════════════════════════════════════════════════════════════
-account_id = "c40947ff58a767be74a53be79a89d68a"
+account_id = "YOUR_DEV_ACCOUNT_ID"
 
 [assets]
 directory = "dist/client"
@@ -22,7 +22,7 @@ binding = "ASSETS"
 [[d1_databases]]
 binding = "DB"
 database_name = "line-harness"
-database_id = "7efe7c20-01ae-4d65-be08-0d7b4202e8a1"
+database_id = "YOUR_DEV_D1_DATABASE_ID"
 
 [[r2_buckets]]
 binding = "IMAGES"
@@ -40,20 +40,20 @@ crons = ["*/5 * * * *", "0 */6 * * *"]
 WORKER_NAME = "line-harness"
 ADMIN_PAGES_PROJECT = "line-harness-admin"
 LIFF_PAGES_PROJECT = "line-harness-liff"
-D1_DATABASE_ID = "7efe7c20-01ae-4d65-be08-0d7b4202e8a1"
+D1_DATABASE_ID = "YOUR_DEV_D1_DATABASE_ID"
 MANIFEST_URL = "https://github.com/Shudesu/line-harness-oss/releases/latest/download/release-manifest.json"
 WORKER_PUBLIC_URL = "https://line-harness.workers.dev"
 ADMIN_PUBLIC_URL = "https://line-harness-admin.pages.dev"
 LIFF_PUBLIC_URL = "https://line-harness-liff.pages.dev"
-CF_ACCOUNT_ID = "c40947ff58a767be74a53be79a89d68a"
+CF_ACCOUNT_ID = "YOUR_DEV_ACCOUNT_ID"
 
 # ═══════════════════════════════════════════════════════════════
-# 本番環境 (aiagent.mini@)
-# 使い方: npx wrangler deploy --env production --name line-crm-worker
+# 本番環境
+# 使い方: npx wrangler deploy --env production --name your-worker-name
 # D1:     npx wrangler d1 execute line-crm --env production --remote --file ...
 # ═══════════════════════════════════════════════════════════════
 [env.production]
-account_id = "37f8f88be4c099329e4647bda211bb9f"
+account_id = "YOUR_ACCOUNT_ID"
 
 [env.production.assets]
 directory = "dist/client"
@@ -62,7 +62,7 @@ binding = "ASSETS"
 [[env.production.d1_databases]]
 binding = "DB"
 database_name = "line-crm"
-database_id = "b2712617-31c4-47c2-accd-4eec906c44ce"
+database_id = "YOUR_D1_DATABASE_ID"
 
 [[env.production.r2_buckets]]
 binding = "IMAGES"
@@ -75,12 +75,12 @@ crons = ["*/5 * * * *", "0 */6 * * *"]
 # the prod resources. Secrets (CF_API_TOKEN, ADMIN_API_KEY) live in the
 # production secret store, set via `wrangler secret put --env production`.
 [env.production.vars]
-WORKER_NAME = "line-crm-worker"
+WORKER_NAME = "your-worker-name"
 ADMIN_PAGES_PROJECT = "line-harness-admin"
 LIFF_PAGES_PROJECT = "line-harness-liff"
-D1_DATABASE_ID = "b2712617-31c4-47c2-accd-4eec906c44ce"
+D1_DATABASE_ID = "YOUR_D1_DATABASE_ID"
 MANIFEST_URL = "https://github.com/Shudesu/line-harness-oss/releases/latest/download/release-manifest.json"
-WORKER_PUBLIC_URL = "https://line-crm-worker.workers.dev"
+WORKER_PUBLIC_URL = "https://your-worker-name.workers.dev"
 ADMIN_PUBLIC_URL = "https://line-harness-admin.pages.dev"
 LIFF_PUBLIC_URL = "https://line-harness-liff.pages.dev"
-CF_ACCOUNT_ID = "37f8f88be4c099329e4647bda211bb9f"
+CF_ACCOUNT_ID = "YOUR_ACCOUNT_ID"

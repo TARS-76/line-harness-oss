@@ -30,7 +30,7 @@ npm install github:your-org/line-harness#main --workspace=packages/sdk
 import { LineHarness } from '@line-harness/sdk'
 
 const lh = new LineHarness({
-  apiUrl: 'https://line-crm-worker.line-crm-api.workers.dev',
+  apiUrl: 'https://your-worker.your-subdomain.workers.dev',
   apiKey: 'your-api-key-here',
   timeout: 30000,  // オプション。デフォルト: 30000ms
 })
@@ -382,7 +382,7 @@ const link = await lh.trackedLinks.create({
   tagId: 'tag-uuid',         // クリック時に自動タグ付与
   scenarioId: 'scenario-uuid' // クリック時に自動エンロール
 })
-// link.trackingUrl => https://line-crm-worker.../t/{id}
+// link.trackingUrl => https://your-worker-name.../t/{id}
 
 const detail = await lh.trackedLinks.get('link-uuid')
 // detail.clicks: LinkClick[]
@@ -567,7 +567,7 @@ LineHarnessError
 import { LineHarness } from '@line-harness/sdk'
 
 const lh = new LineHarness({
-  apiUrl: 'https://line-crm-worker.line-crm-api.workers.dev',
+  apiUrl: 'https://your-worker.your-subdomain.workers.dev',
   apiKey: process.env.LINE_HARNESS_API_KEY!,
 })
 
