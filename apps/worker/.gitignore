@@ -4,3 +4,7 @@
 src/_version.ts
 # override Task 2's ignore — we commit a dev stub that build-time overwrites
 !src/_version.ts
+
+# Local secrets for `wrangler dev` (LINE tokens / API keys). Never commit.
+.dev.vars
+.dev.vars.*
