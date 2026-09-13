@@ -88,3 +88,12 @@
 - **MCP サーバー名を改名した場合に deny が無効化される件が未実測**
   → 構造上の帰結としては確実だが再現確認をしていない
   （[client-setup-runbook.md §6](client-setup-runbook.md)）
+
+---
+
+## 追記: タイムスタンプ表記の層またぎ不一致（2026-09-13）
+
+- **タイムスタンプ表記は SQL 側の naive JST が正**（根拠: `packages/db/migrations/031_batch_lock_at.sql:14` の設計注記）
+  → TS 側の一部が `+09:00` 付きで書いており、層をまたいだ不一致が残る。統一は専用 PR で扱う
+- **`packages/db/src/broadcasts.ts:298` — `new Date(Date.now() + 9h).toISOString()` で JST 値に `Z` が付く**
+  → 値は JST の壁時計時刻なのに UTC を示す suffix が付く。要調査
