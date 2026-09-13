@@ -632,8 +632,8 @@ CREATE TABLE IF NOT EXISTS message_templates (
   name TEXT NOT NULL,
   message_type TEXT NOT NULL CHECK (message_type IN ('text', 'flex')),
   message_content TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- Pool accounts — multiple LINE accounts per traffic pool for distribution
@@ -642,7 +642,7 @@ CREATE TABLE IF NOT EXISTS pool_accounts (
   pool_id TEXT NOT NULL REFERENCES traffic_pools(id) ON DELETE CASCADE,
   line_account_id TEXT NOT NULL REFERENCES line_accounts(id) ON DELETE CASCADE,
   is_active INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
   UNIQUE(pool_id, line_account_id)
 );
 -- Migration 036: Booking feature (Phase 1)

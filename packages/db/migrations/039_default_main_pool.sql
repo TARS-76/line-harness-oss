@@ -12,8 +12,8 @@ SELECT
   'メインプール',
   (SELECT id FROM line_accounts ORDER BY created_at ASC LIMIT 1),
   1,
-  datetime('now'),
-  datetime('now')
+  strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'),
+  strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')
 WHERE NOT EXISTS (SELECT 1 FROM traffic_pools WHERE slug = 'main')
   AND EXISTS (SELECT 1 FROM line_accounts);
 
@@ -27,7 +27,7 @@ SELECT
   (SELECT id FROM traffic_pools WHERE slug = 'main'),
   la.id,
   1,
-  datetime('now')
+  strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')
 FROM line_accounts la
 WHERE EXISTS (SELECT 1 FROM traffic_pools WHERE slug = 'main')
   AND NOT EXISTS (

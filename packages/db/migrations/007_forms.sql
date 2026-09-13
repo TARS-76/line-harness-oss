@@ -8,8 +8,8 @@ CREATE TABLE IF NOT EXISTS forms (
   save_to_metadata INTEGER NOT NULL DEFAULT 1,
   is_active INTEGER NOT NULL DEFAULT 1,
   submit_count INTEGER NOT NULL DEFAULT 0,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE TABLE IF NOT EXISTS form_submissions (
@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS form_submissions (
   form_id TEXT NOT NULL REFERENCES forms (id) ON DELETE CASCADE,
   friend_id TEXT REFERENCES friends (id) ON DELETE SET NULL,
   data TEXT NOT NULL DEFAULT '{}',
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_form_submissions_form ON form_submissions (form_id);
