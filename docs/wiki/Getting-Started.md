@@ -117,13 +117,42 @@ database_id = "ここに貼り付け"
 
 ### スキーマ適用
 
-```bash
-# 本番D1にスキーマ適用
-npx wrangler d1 execute line-crm --file=packages/db/schema.sql
+**新規構築では `packages/db/bootstrap.sql` を使う。`schema.sql` は使わない。**
 
-# ローカルD1にスキーマ適用（開発用）
-pnpm db:migrate:local
+```bash
+# 本番D1
+npx wrangler d1 execute line-crm --file=packages/db/bootstrap.sql
+
+# ローカルD1（開発用）
+npx wrangler d1 execute line-harness --local \
+  --config apps/worker/wrangler.toml \
+  --file=packages/db/bootstrap.sql
 ```
+
+適用後にテーブルが 68 個できていれば成功。
+
+```bash
+npx wrangler d1 execute line-harness --local --config apps/worker/wrangler.toml \
+  --command "SELECT COUNT(*) AS tables FROM sqlite_master WHERE type='table'"
+```
+
+#### なぜ schema.sql ではなく bootstrap.sql なのか
+
+`schema.sql` は **`packages/db/migrations/` を1本も適用していない時点のスキーマ**で、
+これ単体では現行のコードが要求するテーブル・カラムが揃わない。
+
+`bootstrap.sql` は schema.sql に全マイグレーションを畳み込んだ「新規構築用の完成形」。
+同期していることは `packages/db/bootstrap-meta.json` の `includedMigrations` が
+`packages/db/migrations/` のファイル一覧と一致することで確認できる（2026-09 時点でどちらも 51 本）。
+
+```bash
+# 畳み込み済みマイグレーション数 と migrations/ の実ファイル数が一致するか
+node -p "require('./packages/db/bootstrap-meta.json').includedMigrations.length"
+ls packages/db/migrations/ | wc -l
+```
+
+> ⚠️ npm script の `pnpm db:migrate` / `pnpm db:migrate:local` は今も `schema.sql` を
+> 指しているため使わないこと（`package.json` 側は未修正）。
 
 ## 4. Workers シークレット設定
 

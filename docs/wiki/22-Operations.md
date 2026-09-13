@@ -118,8 +118,8 @@ echo "Backup completed: $BACKUP_DIR"
 ### リストア
 
 ```bash
-# schema.sql で空テーブル作成
-wrangler d1 execute line-crm --file=packages/db/schema.sql
+# bootstrap.sql で空テーブル作成 (schema.sql はマイグレーション適用前の姿なので不可)
+wrangler d1 execute line-crm --file=packages/db/bootstrap.sql
 
 # JSON からデータ復元（手動 INSERT が必要）
 ```

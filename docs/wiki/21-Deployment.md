@@ -47,8 +47,10 @@ pnpm install
 # パッケージビルド
 pnpm -r build
 
-# ローカル D1 データベース作成 + マイグレーション
-pnpm db:migrate:local
+# ローカル D1 作成 + スキーマ適用 (bootstrap.sql を使う。schema.sql は不可)
+npx wrangler d1 execute line-harness --local \
+  --config apps/worker/wrangler.toml \
+  --file=packages/db/bootstrap.sql
 ```
 
 ### Worker 開発サーバー
@@ -225,21 +227,32 @@ https://line-harness.your-account.workers.dev
 
 ## D1 データベースマイグレーション
 
+新規構築で適用するのは `packages/db/bootstrap.sql`。`schema.sql` は
+`packages/db/migrations/` を1本も適用していない時点のスキーマなので、単体では現行コードが
+要求するテーブル・カラムが揃わない。`bootstrap.sql` は schema.sql に全マイグレーションを
+畳み込んだ新規構築用の完成形で、同期は `packages/db/bootstrap-meta.json` の
+`includedMigrations` が `packages/db/migrations/` のファイル一覧と一致することで確認できる
+(2026-09 時点でどちらも 51 本)。詳細は
+[Getting-Started](Getting-Started.md#なぜ-schemasql-ではなく-bootstrapsql-なのか)。
+
 ### リモート (本番)
 
 ```bash
-pnpm db:migrate
-# => wrangler d1 execute line-crm --file=packages/db/schema.sql
+npx wrangler d1 execute line-crm --file=packages/db/bootstrap.sql
 ```
 
 ### ローカル
 
 ```bash
-pnpm db:migrate:local
-# => wrangler d1 execute line-crm --file=packages/db/schema.sql --local
+npx wrangler d1 execute line-harness --local \
+  --config apps/worker/wrangler.toml \
+  --file=packages/db/bootstrap.sql
 ```
 
 スキーマは `CREATE TABLE IF NOT EXISTS` を使用しているため、冪等に実行可能。既存テーブルはスキップされる。
+
+> ⚠️ `pnpm db:migrate` / `pnpm db:migrate:local` は `schema.sql` を指したままなので使わない
+> (`package.json` 側は未修正)。
 
 ### D1 データベース作成 (初回のみ)
 

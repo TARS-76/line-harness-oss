@@ -59,11 +59,34 @@ async function fetchBotProfile(accessToken: string): Promise<{ displayName?: str
   }
 }
 
+/**
+ * 当月 1 日 00:00 JST を messages_log.created_at と同じ形式
+ * (YYYY-MM-DDTHH:mm:ss.sss+09:00) で返す。
+ *
+ * SQL 側に date('now', 'start of month') を書くと SQLite が UTC 基準で当月初日を
+ * 出すため、毎月 1 日の 00:00-09:00 JST の 9 時間だけ境界が「前月 1 日」になり、
+ * 前月分の push が messagesThisMonth に混入していた (200 通クォータのゲージが
+ * 月初の朝だけ使い切ったように見える)。時刻は JS 側で組んでバインドパラメータで
+ * 渡す — step-delivery.ts / booking-reminders.ts と同じ「SQL に now を書かない」方針。
+ *
+ * getUTC* を +9h ずらした Date に当てているのは JST の壁時計を読むため
+ * (step-delivery.ts:164 と同じ「JST clock-time を UTC として表現する Date」慣習)。
+ */
+function jstMonthStart(now: Date): string {
+  const jst = new Date(now.getTime() + 9 * 60 * 60_000);
+  const month = String(jst.getUTCMonth() + 1).padStart(2, '0');
+  return `${jst.getUTCFullYear()}-${month}-01T00:00:00.000+09:00`;
+}
+
 // GET /api/line-accounts - list all (with LINE profile + stats)
 lineAccounts.get('/api/line-accounts', async (c) => {
   try {
     const db = c.env.DB;
     const items = await getLineAccounts(db);
+
+    // 1 リクエスト内の全アカウントで同じ境界を使う (アカウント毎に now を取ると
+    // 月初 00:00 をまたいだ瞬間にアカウント間で集計期間がズレる)。
+    const monthStart = jstMonthStart(new Date());
 
     // Get stats for all accounts in parallel
     const results = await Promise.all(
@@ -78,13 +101,15 @@ lineAccounts.get('/api/line-accounts', async (c) => {
           ).bind(item.id).first<{ count: number }>(),
           db.prepare(
             // 「今月送信」(messagesThisMonth) は LINE 公式ダッシュボードの「配信済みの無料メッセージ数」と
-            // 揃える設計: push 系のみ + 当月 1 日 00:00 以降。reply API 経由 (1-on-1 chat) は LINE quota 外なので
+            // 揃える設計: push 系のみ + 当月 1 日 00:00 JST 以降。reply API 経由 (1-on-1 chat) は LINE quota 外なので
             // delivery_type='push' で除外。以前は date('now', '-30 days') の rolling window で月初に bias 残って
             // 公式 dashboard と数桁ズレてた (例: 公式 10 通 vs UI 10,609 通) → start of month に揃えた。
+            // 境界は jstMonthStart() が組む (SQL の date('now',...) は UTC 基準で月初 9 時間ズレる)。
+            // created_at は jstNow() 由来で必ず +09:00 付きの同一形式なので、文字列比較が時刻順比較と一致する。
             `SELECT COUNT(*) as count FROM messages_log ml
              INNER JOIN friends f ON f.id = ml.friend_id
-             WHERE ml.direction = 'outgoing' AND (ml.delivery_type IS NULL OR ml.delivery_type = 'push') AND ml.created_at >= date('now', 'start of month') AND f.line_account_id = ?`,
-          ).bind(item.id).first<{ count: number }>(),
+             WHERE ml.direction = 'outgoing' AND (ml.delivery_type IS NULL OR ml.delivery_type = 'push') AND ml.created_at >= ? AND f.line_account_id = ?`,
+          ).bind(monthStart, item.id).first<{ count: number }>(),
         ]);
 
         return {

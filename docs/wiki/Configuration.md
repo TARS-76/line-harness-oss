@@ -106,14 +106,20 @@ npx wrangler d1 create line-crm
 
 ### スキーマ適用
 
+**新規構築は `packages/db/bootstrap.sql`**（`schema.sql` はマイグレーション適用前の姿なので使わない。
+理由は [Getting-Started](Getting-Started.md#なぜ-schemasql-ではなく-bootstrapsql-なのか) 参照）。
+
 ```bash
 # 本番
-npx wrangler d1 execute line-crm --file=packages/db/schema.sql
+npx wrangler d1 execute line-crm --file=packages/db/bootstrap.sql
 
 # ローカル開発
-pnpm db:migrate:local
-# = wrangler d1 execute line-crm --file=packages/db/schema.sql --local
+npx wrangler d1 execute line-harness --local \
+  --config apps/worker/wrangler.toml \
+  --file=packages/db/bootstrap.sql
 ```
+
+> ⚠️ `pnpm db:migrate` / `pnpm db:migrate:local` は `schema.sql` を指したままなので使わない。
 
 ### D1 ダッシュボード確認
 
@@ -311,6 +317,7 @@ pnpm dev:web             # 管理画面ローカル起動
 pnpm build               # 全パッケージビルド
 pnpm deploy:worker       # Workers デプロイ
 pnpm deploy:web          # 管理画面ビルド
-pnpm db:migrate          # 本番D1にスキーマ適用
-pnpm db:migrate:local    # ローカルD1にスキーマ適用
+# ⚠️ 下の2本は schema.sql を指しており新規構築には使えない (bootstrap.sql を直接実行する)
+pnpm db:migrate          # 本番D1に schema.sql 適用 — 非推奨
+pnpm db:migrate:local    # ローカルD1に schema.sql 適用 — 非推奨
 ```

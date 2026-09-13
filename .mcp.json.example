@@ -1,0 +1,21 @@
+{
+  "_comment": [
+    "クライアント1件あたり1ファイル。コピーして .mcp.json にリネームし、値を差し替える。",
+    "LINE_HARNESS_API_URL: そのクライアントの Worker のベースURL（末尾スラッシュなし）。ローカル検証時は http://127.0.0.1:8788",
+    "LINE_HARNESS_API_KEY: POST /api/staff で発行した staff キー（lh_ + 32hex）。発行時のレスポンスにしか平文が出ないので、その場で保存する",
+    "LINE_HARNESS_ACCOUNT_ID: 任意。複数LINEアカウントを1 Worker で運用している場合のデフォルト。1アカウントなら行ごと削除",
+    "args: npm レジストリからは取らない。リポジトリ内で pnpm --filter @line-harness/mcp-server build した成果物を直接指す",
+    "読み書きの分離は MCP サーバー側に無いため、.claude/settings.json の permissions で必ず絞る"
+  ],
+  "mcpServers": {
+    "line-harness": {
+      "command": "node",
+      "args": ["./packages/mcp-server/dist/index.js"],
+      "env": {
+        "LINE_HARNESS_API_URL": "https://REPLACE-ME.workers.dev",
+        "LINE_HARNESS_API_KEY": "lh_REPLACE_ME_32_HEX_CHARS",
+        "LINE_HARNESS_ACCOUNT_ID": ""
+      }
+    }
+  }
+}
