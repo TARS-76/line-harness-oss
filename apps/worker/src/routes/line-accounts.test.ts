@@ -439,3 +439,109 @@ describe('PUT /api/line-accounts/:id', () => {
     });
   });
 });
+
+// ---------------------------------------------------------------------------
+// GET /api/line-accounts — messagesThisMonth の月初境界
+//
+// WHY: 「今月送信」は LINE 無料プラン 200 通/月クォータのゲージなので、月の
+// 切り替わりを1秒でも取り違えると前月分が混入して「使い切った」ように見える。
+// 以前は SQL 側で date('now','start of month') を使っていたため、SQLite が UTC
+// 基準で当月初日を出し、毎月1日の 00:00-09:00 JST の9時間だけ境界が前月1日に
+// なっていた。ここで固定するのは「now が何時であっても境界は当月1日 00:00 JST」
+// という不変条件。
+// ---------------------------------------------------------------------------
+
+/**
+ * prepare/bind を記録する D1 スタブ。stats 系クエリはすべて {count} を返す。
+ * 「どんなSQLを組んだか」ではなく「境界値をいくつ渡したか」を見たいので、
+ * bind 引数を拾う。
+ */
+function makeStatsDbStub() {
+  const calls: { sql: string; args: unknown[] }[] = [];
+  const db = {
+    prepare: vi.fn((sql: string) => ({
+      bind: vi.fn((...args: unknown[]) => {
+        calls.push({ sql, args });
+        return { first: vi.fn().mockResolvedValue({ count: 0 }) };
+      }),
+    })),
+  } as unknown as D1Database;
+  return { db, calls };
+}
+
+/** messages_log のクエリに渡された当月開始境界を取り出す。 */
+function monthStartBoundary(calls: { sql: string; args: unknown[] }[]): unknown {
+  const call = calls.find((x) => x.sql.includes('FROM messages_log'));
+  if (!call) throw new Error('messages_log のクエリが発行されていない');
+  // account id 以外のバインド値が境界。修正前は境界を渡していないので undefined。
+  return call.args.find((a) => a !== fakeAccount.id);
+}
+
+/** SQL の文字列比較と同じ判定。境界以上なら「今月」に数えられる。 */
+function isCountedAsThisMonth(createdAt: string, boundary: unknown): boolean {
+  return createdAt >= String(boundary);
+}
+
+async function fetchAccountsAt(isoUtcNow: string) {
+  vi.useFakeTimers();
+  vi.setSystemTime(new Date(isoUtcNow));
+  try {
+    dbMocks.getLineAccounts.mockResolvedValue([fakeAccount]);
+    const { db, calls } = makeStatsDbStub();
+    const app = setupApp('owner', db);
+    const res = await app.request('/api/line-accounts');
+    return { res, calls };
+  } finally {
+    vi.useRealTimers();
+  }
+}
+
+describe('GET /api/line-accounts — messagesThisMonth の月初境界', () => {
+  beforeEach(() => {
+    // fetchBotProfile が api.line.me を叩くのを止める（LINE へ到達させない）。
+    vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: false }));
+  });
+
+  test('月初 00:30 JST（前日 15:30 UTC）でも境界は当月1日で、前月の push を数えない', async () => {
+    // 2026-09-30T15:30:00Z === 2026-10-01 00:30 JST
+    const { res, calls } = await fetchAccountsAt('2026-09-30T15:30:00.000Z');
+    expect(res.status).toBe(200);
+
+    const boundary = monthStartBoundary(calls);
+    expect(boundary).toBe('2026-10-01T00:00:00.000+09:00');
+
+    // 前月分は数えない — これが混入していたのが本バグ
+    expect(isCountedAsThisMonth('2026-09-15T12:00:00.000+09:00', boundary)).toBe(false);
+    expect(isCountedAsThisMonth('2026-09-30T23:30:00.000+09:00', boundary)).toBe(false);
+    // 当月分（now の直前に送ったもの）は数える
+    expect(isCountedAsThisMonth('2026-10-01T00:29:00.000+09:00', boundary)).toBe(true);
+  });
+
+  test('月初 09:30 JST（従来も正しかった時間帯）で挙動が変わらない', async () => {
+    // 2026-10-01T00:30:00Z === 2026-10-01 09:30 JST
+    const { res, calls } = await fetchAccountsAt('2026-10-01T00:30:00.000Z');
+    expect(res.status).toBe(200);
+
+    const boundary = monthStartBoundary(calls);
+    expect(boundary).toBe('2026-10-01T00:00:00.000+09:00');
+    expect(isCountedAsThisMonth('2026-09-30T23:30:00.000+09:00', boundary)).toBe(false);
+    expect(isCountedAsThisMonth('2026-10-01T00:30:00.000+09:00', boundary)).toBe(true);
+  });
+
+  test('月末 23:30 JST の push が当月に数えられる', async () => {
+    // 2026-10-31T14:30:00Z === 2026-10-31 23:30 JST
+    const { res, calls } = await fetchAccountsAt('2026-10-31T14:30:00.000Z');
+    expect(res.status).toBe(200);
+
+    const boundary = monthStartBoundary(calls);
+    expect(boundary).toBe('2026-10-01T00:00:00.000+09:00');
+    expect(isCountedAsThisMonth('2026-10-31T23:30:00.000+09:00', boundary)).toBe(true);
+  });
+
+  test('SQL 側に UTC 基準の now を残さない', async () => {
+    const { calls } = await fetchAccountsAt('2026-09-30T15:30:00.000Z');
+    const sql = calls.find((x) => x.sql.includes('FROM messages_log'))!.sql;
+    expect(sql).not.toContain("date('now'");
+    expect(sql).not.toContain("'now'");
+  });
+});
