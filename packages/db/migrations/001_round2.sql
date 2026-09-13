@@ -12,8 +12,8 @@ CREATE TABLE IF NOT EXISTS users (
   phone        TEXT,
   external_id  TEXT,
   display_name TEXT,
-  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
 CREATE INDEX IF NOT EXISTS idx_users_phone ON users (phone);
@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS line_accounts (
   channel_access_token TEXT NOT NULL,
   channel_secret       TEXT NOT NULL,
   is_active            INTEGER NOT NULL DEFAULT 1,
-  created_at           TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at           TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at           TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at           TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- Conversion Points
@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS conversion_points (
   name       TEXT NOT NULL,
   event_type TEXT NOT NULL,
   value      REAL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- Conversion Events
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS conversion_events (
   user_id             TEXT,
   affiliate_code      TEXT,
   metadata            TEXT,
-  created_at          TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at          TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_conversion_events_point ON conversion_events (conversion_point_id);
 CREATE INDEX IF NOT EXISTS idx_conversion_events_friend ON conversion_events (friend_id);
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS affiliates (
   code            TEXT NOT NULL UNIQUE,
   commission_rate REAL NOT NULL DEFAULT 0,
   is_active       INTEGER NOT NULL DEFAULT 1,
-  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- Affiliate Clicks
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS affiliate_clicks (
   affiliate_id TEXT NOT NULL REFERENCES affiliates (id) ON DELETE CASCADE,
   url          TEXT,
   ip_address   TEXT,
-  created_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 CREATE INDEX IF NOT EXISTS idx_affiliate_clicks_affiliate ON affiliate_clicks (affiliate_id);
 
@@ -79,5 +79,5 @@ CREATE TABLE IF NOT EXISTS admin_users (
   id            TEXT PRIMARY KEY,
   email         TEXT NOT NULL UNIQUE,
   password_hash TEXT NOT NULL,
-  created_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );

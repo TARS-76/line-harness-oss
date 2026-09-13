@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS pool_accounts (
   pool_id TEXT NOT NULL REFERENCES traffic_pools(id) ON DELETE CASCADE,
   line_account_id TEXT NOT NULL REFERENCES line_accounts(id) ON DELETE CASCADE,
   is_active INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
   UNIQUE(pool_id, line_account_id)
 );
 
@@ -14,6 +14,6 @@ SELECT
   tp.id,
   tp.active_account_id,
   1,
-  datetime('now')
+  strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')
 FROM traffic_pools tp
 WHERE tp.active_account_id IS NOT NULL;

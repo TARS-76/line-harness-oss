@@ -3,6 +3,6 @@ CREATE TABLE IF NOT EXISTS message_templates (
   name TEXT NOT NULL,
   message_type TEXT NOT NULL CHECK (message_type IN ('text', 'flex')),
   message_content TEXT NOT NULL,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );

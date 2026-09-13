@@ -13,8 +13,8 @@ CREATE TABLE IF NOT EXISTS incoming_webhooks (
   source_type TEXT NOT NULL DEFAULT 'custom',  -- stripe, google_calendar, custom
   secret      TEXT,                             -- 署名検証用シークレット
   is_active   INTEGER NOT NULL DEFAULT 1,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- 送信Webhook登録
@@ -25,8 +25,8 @@ CREATE TABLE IF NOT EXISTS outgoing_webhooks (
   event_types TEXT NOT NULL DEFAULT '[]',       -- JSON配列: ["friend_add","tag_change","cv_fire"]
   secret      TEXT,                             -- HMAC署名用シークレット
   is_active   INTEGER NOT NULL DEFAULT 1,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- ============================================================
@@ -40,8 +40,8 @@ CREATE TABLE IF NOT EXISTS google_calendar_connections (
   api_key       TEXT,
   auth_type     TEXT NOT NULL DEFAULT 'api_key',  -- oauth, api_key
   is_active     INTEGER NOT NULL DEFAULT 1,
-  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE TABLE IF NOT EXISTS calendar_bookings (
@@ -54,8 +54,8 @@ CREATE TABLE IF NOT EXISTS calendar_bookings (
   end_at         TEXT NOT NULL,
   status         TEXT NOT NULL DEFAULT 'confirmed' CHECK (status IN ('confirmed', 'cancelled', 'completed')),
   metadata       TEXT,                           -- JSON
-  created_at     TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_calendar_bookings_friend ON calendar_bookings (friend_id);
@@ -69,8 +69,8 @@ CREATE TABLE IF NOT EXISTS reminders (
   name        TEXT NOT NULL,
   description TEXT,
   is_active   INTEGER NOT NULL DEFAULT 1,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- リマインダのステップ（何日前/何時間前に何を送るか）
@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS reminder_steps (
   offset_minutes  INTEGER NOT NULL,              -- 負数: 前（-1440 = 1日前）、正数: 後
   message_type    TEXT NOT NULL CHECK (message_type IN ('text', 'image', 'flex')),
   message_content TEXT NOT NULL,
-  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_reminder_steps_reminder ON reminder_steps (reminder_id);
@@ -92,8 +92,8 @@ CREATE TABLE IF NOT EXISTS friend_reminders (
   reminder_id     TEXT NOT NULL REFERENCES reminders (id) ON DELETE CASCADE,
   target_date     TEXT NOT NULL,                  -- ターゲット日時 (ISO 8601)
   status          TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'completed', 'cancelled')),
-  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_friend_reminders_status ON friend_reminders (status);
@@ -104,7 +104,7 @@ CREATE TABLE IF NOT EXISTS friend_reminder_deliveries (
   id                TEXT PRIMARY KEY,
   friend_reminder_id TEXT NOT NULL REFERENCES friend_reminders (id) ON DELETE CASCADE,
   reminder_step_id  TEXT NOT NULL REFERENCES reminder_steps (id) ON DELETE CASCADE,
-  delivered_at      TEXT NOT NULL DEFAULT (datetime('now')),
+  delivered_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
   UNIQUE (friend_reminder_id, reminder_step_id)
 );
 
@@ -117,8 +117,8 @@ CREATE TABLE IF NOT EXISTS scoring_rules (
   event_type  TEXT NOT NULL,                     -- url_click, form_submit, purchase, message_received, tag_added, etc.
   score_value INTEGER NOT NULL,                  -- 加算スコア（負数も可）
   is_active   INTEGER NOT NULL DEFAULT 1,
-  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 -- 友だちスコア履歴
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS friend_scores (
   scoring_rule_id TEXT REFERENCES scoring_rules (id) ON DELETE SET NULL,
   score_change    INTEGER NOT NULL,
   reason          TEXT,
-  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_friend_scores_friend ON friend_scores (friend_id);
@@ -146,8 +146,8 @@ CREATE TABLE IF NOT EXISTS templates (
   category        TEXT NOT NULL DEFAULT 'general',
   message_type    TEXT NOT NULL CHECK (message_type IN ('text', 'image', 'flex', 'carousel')),
   message_content TEXT NOT NULL,
-  created_at      TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at      TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_templates_category ON templates (category);
@@ -161,8 +161,8 @@ CREATE TABLE IF NOT EXISTS operators (
   email      TEXT NOT NULL UNIQUE,
   role       TEXT NOT NULL DEFAULT 'operator' CHECK (role IN ('admin', 'operator')),
   is_active  INTEGER NOT NULL DEFAULT 1,
-  created_at TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE TABLE IF NOT EXISTS chats (
@@ -172,8 +172,8 @@ CREATE TABLE IF NOT EXISTS chats (
   status        TEXT NOT NULL DEFAULT 'unread' CHECK (status IN ('unread', 'in_progress', 'resolved')),
   notes         TEXT,
   last_message_at TEXT,
-  created_at    TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at    TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at    TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_chats_friend ON chats (friend_id);
@@ -190,8 +190,8 @@ CREATE TABLE IF NOT EXISTS notification_rules (
   conditions   TEXT NOT NULL DEFAULT '{}',       -- JSON: 閾値等の条件
   channels     TEXT NOT NULL DEFAULT '["webhook"]', -- JSON配列: ["webhook","email","dashboard"]
   is_active    INTEGER NOT NULL DEFAULT 1,
-  created_at   TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at   TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at   TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE TABLE IF NOT EXISTS notifications (
@@ -203,7 +203,7 @@ CREATE TABLE IF NOT EXISTS notifications (
   channel         TEXT NOT NULL,                 -- webhook, email, dashboard
   status          TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'sent', 'failed')),
   metadata        TEXT,                          -- JSON
-  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_notifications_status ON notifications (status);
@@ -220,7 +220,7 @@ CREATE TABLE IF NOT EXISTS stripe_events (
   amount           REAL,
   currency         TEXT,
   metadata         TEXT,                         -- JSON
-  processed_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  processed_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_stripe_events_friend ON stripe_events (friend_id);
@@ -238,7 +238,7 @@ CREATE TABLE IF NOT EXISTS account_health_logs (
   error_count     INTEGER NOT NULL DEFAULT 0,
   check_period    TEXT NOT NULL,                 -- チェック期間 (ISO 8601)
   risk_level      TEXT NOT NULL DEFAULT 'normal' CHECK (risk_level IN ('normal', 'warning', 'danger')),
-  created_at      TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at      TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_health_logs_account ON account_health_logs (line_account_id);
@@ -251,7 +251,7 @@ CREATE TABLE IF NOT EXISTS account_migrations (
   status           TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'in_progress', 'completed', 'failed')),
   migrated_count   INTEGER NOT NULL DEFAULT 0,
   total_count      INTEGER NOT NULL DEFAULT 0,
-  created_at       TEXT NOT NULL DEFAULT (datetime('now')),
+  created_at       TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
   completed_at     TEXT
 );
 
@@ -267,8 +267,8 @@ CREATE TABLE IF NOT EXISTS automations (
   actions     TEXT NOT NULL DEFAULT '[]',        -- JSON配列: [{type:"add_tag",params:{tagId:"..."}}, ...]
   is_active   INTEGER NOT NULL DEFAULT 1,
   priority    INTEGER NOT NULL DEFAULT 0,        -- 実行順序
-  created_at  TEXT NOT NULL DEFAULT (datetime('now')),
-  updated_at  TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours')),
+  updated_at  TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_automations_event ON automations (event_type);
@@ -282,7 +282,7 @@ CREATE TABLE IF NOT EXISTS automation_logs (
   event_data     TEXT,                           -- JSON: トリガーイベントデータ
   actions_result TEXT,                           -- JSON: 各アクションの実行結果
   status         TEXT NOT NULL DEFAULT 'success' CHECK (status IN ('success', 'partial', 'failed')),
-  created_at     TEXT NOT NULL DEFAULT (datetime('now'))
+  created_at     TEXT NOT NULL DEFAULT (strftime('%Y-%m-%dT%H:%M:%f', 'now', '+9 hours'))
 );
 
 CREATE INDEX IF NOT EXISTS idx_automation_logs_automation ON automation_logs (automation_id);
