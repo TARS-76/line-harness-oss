@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "mcp__line-harness__list_friends",
+      "mcp__line-harness__get_friend_detail",
+      "mcp__line-harness__list_conversations",
+      "mcp__line-harness__get_conversation",
+      "mcp__line-harness__account_summary",
+      "mcp__line-harness__list_crm_objects",
+      "mcp__line-harness__get_form_submissions",
+      "mcp__line-harness__get_link_clicks",
+      "mcp__line-harness__get_conversion_logs"
+    ],
+    "deny": [
+      "mcp__line-harness__send_message",
+      "mcp__line-harness__broadcast",
+      "mcp__line-harness__manage_broadcasts",
+      "mcp__line-harness__enroll_in_scenario",
+      "mcp__line-harness__create_scenario",
+      "mcp__line-harness__manage_scenarios",
+      "mcp__line-harness__create_form",
+      "mcp__line-harness__manage_forms",
+      "mcp__line-harness__create_rich_menu",
+      "mcp__line-harness__manage_rich_menus",
+      "mcp__line-harness__create_tracked_link",
+      "mcp__line-harness__manage_tracked_links",
+      "mcp__line-harness__manage_tags",
+      "mcp__line-harness__manage_friends",
+      "mcp__line-harness__manage_auto_replies",
+      "mcp__line-harness__manage_message_templates",
+      "mcp__line-harness__manage_traffic_pools",
+      "mcp__line-harness__manage_ad_platforms",
+      "mcp__line-harness__manage_staff",
+      "mcp__line-harness__upload_image"
+    ]
+  }
+}
