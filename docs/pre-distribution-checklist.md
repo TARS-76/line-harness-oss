@@ -122,4 +122,4 @@
   `julianday('now') - julianday(col)`（SQLite が offset を UTC 正規化する）、naive JST の列は
   `julianday('now', '+9 hours') - julianday(col)`。混ぜると 9 時間ズレる
   - 実例: `packages/db/src/broadcasts.ts:250` の `sent_at`（`+09:00`）比較が `'+9 hours'` を使っており
-    9 時間早く拾っていた → `fix/insight-sent-at-offset` で修正。`batch_lock_at`（naive JST）の比較（:374 / :395）は正しい
+    9 時間早く拾っていた → #7 でマージ済み（`julianday('now')` に修正）。`batch_lock_at`（naive JST）の比較（:374 / :395）は正しい
