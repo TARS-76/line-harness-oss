@@ -1,0 +1,49 @@
+name: MCP Check
+
+# MCP permission reconciliation (scripts/check-mcp-permissions.ts).
+#
+# `.claude/settings.json` gates every MCP tool the harness exposes. A tool
+# registered under packages/mcp-server but listed in neither allow nor deny
+# falls through to an interactive prompt — which in an unattended session
+# silently means the tool is reachable. A renamed `mcpServers` key in
+# `.mcp.json.example` would leave every deny entry unmatched with no error.
+# This workflow makes both kinds of drift fail on the PR instead.
+#
+# `--ci` checks `.mcp.json.example` only (`.mcp.json` is gitignored).
+
+on:
+  pull_request:
+    paths:
+      - 'packages/mcp-server/**'
+      - '.claude/settings.json'
+      - '.mcp.json.example'
+      - 'scripts/check-mcp-permissions.ts'
+      - '.github/workflows/mcp-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/mcp-server/**'
+      - '.claude/settings.json'
+      - '.mcp.json.example'
+      - 'scripts/check-mcp-permissions.ts'
+      - '.github/workflows/mcp-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  mcp-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - run: pnpm check:mcp --ci
