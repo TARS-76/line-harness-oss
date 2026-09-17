@@ -15,6 +15,7 @@
     "deploy:setup": "node packages/create-line-harness/dist/index.js",
     "deploy:update": "node packages/create-line-harness/dist/index.js update",
     "test:scripts": "vitest run --config vitest.config.ts",
+    "check:mcp": "tsx scripts/check-mcp-permissions.ts",
     "build:bundle": "tsx scripts/release/build-bundle.ts"
   },
   "packageManager": "pnpm@9.15.4",
