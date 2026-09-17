@@ -247,7 +247,7 @@ export async function getPendingInsights(
        JOIN broadcasts b ON bi.broadcast_id = b.id
        WHERE bi.status = 'pending'
          AND b.sent_at IS NOT NULL
-         AND julianday('now', '+9 hours') - julianday(b.sent_at) >= 3`,
+         AND julianday('now') - julianday(b.sent_at) >= 3`,
     )
     .all();
   const parseArr = (v: unknown): string[] | null => {
