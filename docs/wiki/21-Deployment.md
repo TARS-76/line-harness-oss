@@ -251,8 +251,8 @@ npx wrangler d1 execute line-harness --local \
 
 スキーマは `CREATE TABLE IF NOT EXISTS` を使用しているため、冪等に実行可能。既存テーブルはスキップされる。
 
-> ⚠️ `pnpm db:migrate` / `pnpm db:migrate:local` は `schema.sql` を指したままなので使わない
-> (`package.json` 側は未修正)。
+> ℹ️ `pnpm db:migrate` / `pnpm db:migrate:local` は `schema.sql` を指していたため廃止済み
+> (`bootstrap.sql` を直接実行する)。
 
 ### D1 データベース作成 (初回のみ)
 

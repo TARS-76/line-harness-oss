@@ -42,9 +42,8 @@ npx wrangler d1 execute <DB名> --local --file=../../packages/db/bootstrap.sql
 畳み込み済みのマイグレーション一覧は `packages/db/bootstrap-meta.json`（`migrationCount: 51`）にある。
 スキーマを変えたときは `pnpm --dir packages/db generate:bootstrap` で再生成する。
 
-> ⚠️ **未決**: `package.json` の `db:migrate` / `db:migrate:local` は現在 **`schema.sql` を指している**。
-> このスクリプトを踏むと 51 本ぶん古い DB ができる。
-> 直すか、スクリプトごと廃止するかは未決。→ [pre-distribution-checklist.md](pre-distribution-checklist.md)
+> ℹ️ `package.json` の `db:migrate` / `db:migrate:local` は **`schema.sql`（51 本ぶん古い DB）を指していたため廃止済み**。
+> スキーマ適用は `bootstrap.sql` を直接実行する。→ [pre-distribution-checklist.md](pre-distribution-checklist.md)
 
 ### 最初のクライアント用 D1 を作るとき ⚠️
 

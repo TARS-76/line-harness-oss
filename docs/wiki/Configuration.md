@@ -119,7 +119,7 @@ npx wrangler d1 execute line-harness --local \
   --file=packages/db/bootstrap.sql
 ```
 
-> ⚠️ `pnpm db:migrate` / `pnpm db:migrate:local` は `schema.sql` を指したままなので使わない。
+> ℹ️ `pnpm db:migrate` / `pnpm db:migrate:local` は `schema.sql` を指していたため廃止済み。
 
 ### D1 ダッシュボード確認
 
@@ -317,7 +317,5 @@ pnpm dev:web             # 管理画面ローカル起動
 pnpm build               # 全パッケージビルド
 pnpm deploy:worker       # Workers デプロイ
 pnpm deploy:web          # 管理画面ビルド
-# ⚠️ 下の2本は schema.sql を指しており新規構築には使えない (bootstrap.sql を直接実行する)
-pnpm db:migrate          # 本番D1に schema.sql 適用 — 非推奨
-pnpm db:migrate:local    # ローカルD1に schema.sql 適用 — 非推奨
+# D1 スキーマ適用の npm script は無い (db:migrate は廃止。bootstrap.sql を直接実行する)
 ```

@@ -274,8 +274,8 @@ curl -s https://your-worker.your-subdomain.workers.dev/api/friends/count \
 ```bash
 cd /Users/axpr/claudecode/tools/line-harness
 
-# スキーマ適用 (bootstrap.sql を使う。pnpm db:migrate は schema.sql を
-# 指しており、migrations/ 適用前の姿なので新規構築には使えない)
+# スキーマ適用 (bootstrap.sql を使う。旧 pnpm db:migrate は schema.sql =
+# migrations/ 適用前の姿を指していたため廃止済み)
 npx wrangler d1 execute line-crm --file=packages/db/bootstrap.sql
 ```
 

@@ -151,8 +151,8 @@ node -p "require('./packages/db/bootstrap-meta.json').includedMigrations.length"
 ls packages/db/migrations/ | wc -l
 ```
 
-> ⚠️ npm script の `pnpm db:migrate` / `pnpm db:migrate:local` は今も `schema.sql` を
-> 指しているため使わないこと（`package.json` 側は未修正）。
+> ℹ️ npm script の `pnpm db:migrate` / `pnpm db:migrate:local` は `schema.sql` を
+> 指していたため廃止済み。上記のとおり `bootstrap.sql` を直接実行する。
 
 ## 4. Workers シークレット設定
 

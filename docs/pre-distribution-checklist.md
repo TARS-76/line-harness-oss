@@ -86,8 +86,8 @@
 
 手順書側で「未決」と印を付けたもの。再掲のみで、判断は同じくしていない。
 
-- **`package.json` の `db:migrate` / `db:migrate:local` が `schema.sql` を指している**
-  → 51 マイグレーション前の DB ができる。修正するか廃止するか未決
+- ~~**`package.json` の `db:migrate` / `db:migrate:local` が `schema.sql` を指している**~~
+  → 2026-09-27 両 script を廃止して決着（新規構築は `bootstrap.sql` を直接適用する）
   （[client-setup-runbook.md §1](client-setup-runbook.md)）
 - **staff キーが D1 に平文保存されている**
   → ハッシュ保存へ移すか未決。移す場合は既存キーの移行が要る
